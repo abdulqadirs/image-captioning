@@ -11,7 +11,7 @@ import torchvision.transforms as transforms
 from torch.utils.data.sampler import SubsetRandomSampler
 
 
-
+                                                                
 def read_captions(path):
     """
     Reads the captions of images, strips and appends <start> & <end> tokens
@@ -115,7 +115,7 @@ class Flickr8k(Dataset):
         caption = self.captions[index]
         im_id = self.image_ids[index]
         lengths = self.lengths[index]
-        im = Image.open(self.dataset_directory + '/' + self.dataset_directory + '/' + im_id)
+        im = Image.open('../Flickr8k_Dataset/Flickr8k_images/Flickr8k_images/' + im_id)
         if self.transform is not None:
             im = self.transform(im)
             
@@ -171,12 +171,12 @@ def data_loaders(images_path, captions_path):
 
     validation_loader = DataLoader(flickr8k_dataset,
                         num_workers = 1,
-                        batch_size = 2,
+                        batch_size = 1,
                         sampler= valid_sampler)
 
     testing_loader = DataLoader(flickr8k_dataset,
                         num_workers = 1,
-                        batch_size = 2,
+                        batch_size = 1,
                         sampler= test_sampler)
 
     return training_loader, validation_loader, testing_loader
