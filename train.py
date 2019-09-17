@@ -1,7 +1,7 @@
 import configparser
 from data import data_loaders
-from encoder import Encoder
-from decoder import Decoder
+from models.encoder import Encoder
+from models.decoder import Decoder
 from pretrained_embeddings import load_pretrained_embeddings
 from data import read_captions, dictionary
 from loss_function import criterion
