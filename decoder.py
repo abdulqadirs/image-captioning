@@ -37,13 +37,13 @@ class Decoder(nn.Module):
         #features.view(2, 20, self.embed_dim)
         lstm_output, _ = self.lstm(embeddings)
         #hiddens, _ = pad_packed_sequence(packed, batch_first=True)
-        lstm_output = lstm_output[:,1:,:]
-        outputs = self.fc_out(lstm_output)
+        lstm_output_reshaped = lstm_output[:,1:,:]
+        outputs = self.fc_out(lstm_output_reshaped)
         #outputs = self.fc_out(lstm_output)
-        batch_size, captions_length, vocab_length = outputs.size()
-        for i in range(batch_size):
-            for j in range(captions_length):
-                outputs[i][j] = self.softmax(outputs[i][j])
+        # batch_size, captions_length, vocab_length = outputs.size()
+        # for i in range(batch_size):
+        #     for j in range(captions_length):
+        #         outputs[i][j] = self.softmax(outputs[i][j])
 
         
         return outputs
