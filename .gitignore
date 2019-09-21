@@ -10,6 +10,7 @@ embeddings/*
 *.tar
 # Byte-compiled / optimized / DLL files
 __pycache__/
+output/
 *.py[cod]
 *$py.class
 

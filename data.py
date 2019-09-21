@@ -166,17 +166,17 @@ def data_loaders(images_path, captions_path):
 
     training_loader = DataLoader(flickr8k_dataset,
                         num_workers = 1,
-                        batch_size = 1,
+                        batch_size = 2,
                         sampler= train_sampler)
 
     validation_loader = DataLoader(flickr8k_dataset,
                         num_workers = 1,
-                        batch_size = 1,
+                        batch_size = 2,
                         sampler= valid_sampler)
 
     testing_loader = DataLoader(flickr8k_dataset,
                         num_workers = 1,
-                        batch_size = 1,
+                        batch_size = 2,
                         sampler= test_sampler)
 
     return training_loader, validation_loader, testing_loader
