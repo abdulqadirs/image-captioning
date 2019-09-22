@@ -9,8 +9,9 @@ from torch.utils.data import Dataset, DataLoader
 from torchvision import datasets
 import torchvision.transforms as transforms
 from torch.utils.data.sampler import SubsetRandomSampler
+import logging
 
-
+logger = logging.getLogger('captioning')
                                                                 
 def read_captions(path):
     """

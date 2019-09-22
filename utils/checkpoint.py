@@ -24,4 +24,24 @@ def save_checkpoint(epoch, outdir, encoder, decoder, optimizer, criterion,
                 'decoder': decoder.state_dict(),
                 'optimizer': optimizer.state_dict(),
                 }, str(filename))
+
+
+def load_checkpoint(checkpoint_file):
+    """
+    Loads the checkpoint of the model
     
+    Params
+    ------
+    - checkpoint_file: file name of latest checkpoint file
+
+    Return
+    ------
+    - checkpoint
+    """
+    if checkpoint_file.exists():
+        print('Loading the checkpoint file')
+        checkpoint = torch.load(str(checkpoint_file))
+    else:
+        print('No check point file exits')
+    
+    return checkpoint
