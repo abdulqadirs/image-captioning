@@ -2,7 +2,7 @@ import logging
 from models.encoder import Encoder
 from models.decoder import Decoder
 from image_captioning import ImageCaptioning
-from setup_logging import setup_logging
+from utils.setup_logging import setup_logging
 import configparser
 from data import data_loaders, read_captions, dictionary
 from pretrained_embeddings import load_pretrained_embeddings
