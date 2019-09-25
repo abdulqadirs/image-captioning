@@ -12,8 +12,8 @@ def setup_logging(logfile, level):
     streamhandler.setLevel(level)
     streamhandler.setFormatter(formatter)
     logger.addHandler(streamhandler)
-    if logfile:
-        filehandler = logging.FileHandler(logfile)
-        filehandler.setLevel(level)
-        filehandler.setFormatter(formatter)
-        logger.addHandler(filehandler)
+    #if logfile:
+    filehandler = logging.FileHandler(logfile)
+    filehandler.setLevel(level)
+    filehandler.setFormatter(formatter)
+    logger.addHandler(filehandler)

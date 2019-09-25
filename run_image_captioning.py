@@ -11,8 +11,8 @@ from utils.checkpoint import load_checkpoint
 from config import Config
 from utils.read_config import read_config
 from loss_function import cross_entropy
+from torch.utils.tensorboard import SummaryWriter
 
-LOG_LEVEL = logging.INFO
 logger = logging.getLogger('captioning')
 
 def main():
@@ -24,7 +24,11 @@ def main():
 
     output_dir = Config.get("output_dir")
     logfile = Config.get("logfile")
-    setup_logging(logfile = str(output_dir / logfile), level = logging.INFO)
+    logfile_path = output_dir + '/' + logfile
+    setup_logging(logfile_path, logging.INFO)
+
+    #tensorboard
+    tensorboard_writer = SummaryWriter(output_dir)
     
     #load dataset
     images_path = Config.get("images_dir")
@@ -55,10 +59,10 @@ def main():
 
     #load checkpoint
     checkpoint_file = Config.get("checkpoint_file")
-    checkpoint_captioning = load_checkpoint(str(output_dir / checkpoint_file))
+    checkpoint_captioning = load_checkpoint(output_dir + '/' + checkpoint_file)
 
     start_epoch = 1
-    if checkpoint_captioning:
+    if checkpoint_captioning is not None:
         start_epoch = checkpoint_captioning['epoch'] + 1
         encoder.load_state_dict(checkpoint_captioning['encoder'])
         decoder.load_state_dict(checkpoint_captioning['decoder'])
@@ -70,7 +74,7 @@ def main():
     #image captioning model
     model = ImageCaptioning(encoder, decoder, optimizer, criterion,
                                             training_loader, validation_loader, testing_loader,
-                                            pretrained_embeddings, output_dir)
+                                            pretrained_embeddings, output_dir, tensorboard_writer)
     
     #training
     validate_every = Config.get("validate_every")
@@ -82,5 +86,6 @@ def main():
 
 
 
-
+if __name__ == "__main__":
+    main()
 

@@ -3,13 +3,14 @@ import numpy as np
 from utils.checkpoint import save_checkpoint
 from config import Config
 import logging
+from utils.stats import Statistics
 
 logger = logging.getLogger("captioning")
 
 class ImageCaptioning:
     def __init__(self, encoder, decoder, optimizer, criterion, 
                 traing_loader, validation_loader, testing_loader,
-                 pretrained_embeddings, output_dir):
+                 pretrained_embeddings, output_dir, tensorboard_writer):
         self.encoder = encoder
         self.decoder = decoder
         self.optimizer = optimizer
@@ -19,12 +20,14 @@ class ImageCaptioning:
         self.testing_loader = testing_loader
         self.pretrained_embeddings = pretrained_embeddings
         self.output_dir = output_dir
+        self.tensorboard_writer = tensorboard_writer
+        self.stat = Statistics(output_dir, tensorboard_writer)
 
     def train(self,epochs, validate_every, start_epoch):
         """
         training to generate captions for given images
         """
-        for epoch in range(epochs):
+        for epoch in range(start_epoch, epochs + 1):
             training_batch_losses = []
             for i, data in enumerate(self.training_loader, 0):
                 images, captions, lengths = data
@@ -44,8 +47,11 @@ class ImageCaptioning:
                 # mean loss per epoch
                 #print("epoch: ", epoch)
                 #print(np.mean(training_batch_losses))
-            if epoch % validate_every == 0:
+            self.stat.record(training_losses=np.mean(training_batch_losses))
+            self.stat.push_tensorboard_losses(epoch)
+            if (epoch -1) % validate_every == 0:
                 self.validation()
+                #if i % 5 == 0:
                 save_checkpoint(epoch = epoch,
                                 outdir = self.output_dir,
                                 encoder = self.encoder,

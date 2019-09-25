@@ -1,4 +1,8 @@
 import torch
+from pathlib import Path
+import logging
+
+logger = logging.getLogger("captioning")
 
 def save_checkpoint(epoch, outdir, encoder, decoder, optimizer, criterion, 
                     filename = 'checkpoint.ImageCaptioning.pth.tar'):
@@ -38,10 +42,12 @@ def load_checkpoint(checkpoint_file):
     ------
     - checkpoint
     """
+    checkpoint = None
+    checkpoint_file = Path(checkpoint_file)
     if checkpoint_file.exists():
-        print('Loading the checkpoint file')
-        checkpoint = torch.load(str(checkpoint_file))
+        logger.info('Loading the checkpoint file')
+        checkpoint = torch.load(checkpoint_file)
     else:
-        print('No check point file exits')
+        logger.info('Checkpoint file doesnot exist')
     
     return checkpoint

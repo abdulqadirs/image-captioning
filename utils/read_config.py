@@ -29,7 +29,7 @@ def read_config(file_path):
     Config.set("decoder_hidden_size", config.getint("decoder", "hidden_size"))
 
     #Training
-    Config.set("training_batch_size", config.getint("training_batch_size", "batch_size"))
+    Config.set("training_batch_size", config.getint("training", "batch_size"))
     Config.set("epochs", config.getint("training", "epochs"))
     Config.set("learning_rate", config.getfloat("training", "learning_rate"))
 
@@ -41,7 +41,7 @@ def read_config(file_path):
 
 
     #logging
-    Config.set("logfile", config.get("logging", "logifile"))
+    Config.set("logfile", config.get("logging", "logfile"))
 
 
 
