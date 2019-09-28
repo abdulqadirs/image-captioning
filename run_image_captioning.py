@@ -9,26 +9,28 @@ from pretrained_embeddings import load_pretrained_embeddings
 from optimizer import adam_optimizer
 from utils.checkpoint import load_checkpoint
 from config import Config
-from utils.read_config import read_config
+from utils.read_config import reading_config
 from loss_function import cross_entropy
 from torch.utils.tensorboard import SummaryWriter
 
 logger = logging.getLogger('captioning')
 
 def main():
-    #setup and read config.ini
-    config_file = 'config.ini'
-    read_config(config_file)
-
+   
     #setup logging
-
-    output_dir = Config.get("output_dir")
-    logfile = Config.get("logfile")
+    #output_dir = Config.get("output_dir")
+    output_dir = 'output'
+    #logfile = Config.get("logfile")
+    logfile = 'output.log'
     logfile_path = output_dir + '/' + logfile
     setup_logging(logfile_path, logging.INFO)
 
+     #setup and read config.ini
+    config_file = 'config.ini'
+    reading_config(config_file)
+
     #tensorboard
-    tensorboard_writer = SummaryWriter(output_dir)
+    tensorboard_writer = SummaryWriter('output/train')
     
     #load dataset
     images_path = Config.get("images_dir")
@@ -49,7 +51,7 @@ def main():
     vocab_size = len(id_to_word)
     encoder = Encoder(embed_size)
     decoder = Decoder(embed_size, hidden_size, vocab_size, batch_size)
-
+    
     #load the optimizer
     learning_rate = Config.get("learning_rate")
     optimizer = adam_optimizer(encoder, decoder, learning_rate)

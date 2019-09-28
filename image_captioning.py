@@ -23,6 +23,10 @@ class ImageCaptioning:
         self.tensorboard_writer = tensorboard_writer
         self.stat = Statistics(output_dir, tensorboard_writer)
 
+        self.encoder = self.encoder.to(Config.get("device"))
+        self.decoder = self.decoder.to(Config.get("device"))
+        self.pretrained_embeddings = self.pretrained_embeddings.to(Config.get("device"))
+
     def train(self,epochs, validate_every, start_epoch):
         """
         training to generate captions for given images
@@ -32,6 +36,8 @@ class ImageCaptioning:
             for i, data in enumerate(self.training_loader, 0):
                 images, captions, lengths = data
                 self.optimizer.zero_grad()
+                images = images.to(Config.get("device"))
+                captions = captions.to(Config.get("device"))
                 #image features
                 image_features = self.encoder(images)
                 #predicted captions
@@ -47,23 +53,25 @@ class ImageCaptioning:
                 # mean loss per epoch
                 #print("epoch: ", epoch)
                 #print(np.mean(training_batch_losses))
-            self.stat.record(training_losses=np.mean(training_batch_losses))
-            self.stat.push_tensorboard_losses(epoch)
-            if (epoch -1) % validate_every == 0:
-                self.validation()
-                #if i % 5 == 0:
-                save_checkpoint(epoch = epoch,
-                                outdir = self.output_dir,
-                                encoder = self.encoder,
-                                decoder = self.decoder,
-                                optimizer = self.optimizer,
-                                criterion = self.criterion)
+                self.stat.record(training_losses=np.mean(training_batch_losses))
+                self.stat.push_tensorboard_losses(epoch)
+            #if (epoch -1) % validate_every == 0:
+             #   self.validation()
+                if i % 5 == 0:
+                    save_checkpoint(epoch = epoch,
+                                    outdir = self.output_dir,
+                                    encoder = self.encoder,
+                                    decoder = self.decoder,
+                                    optimizer = self.optimizer,
+                                    criterion = self.criterion)
 
 
     
     def validation(self):
         for _, data in enumerate(self.validation_loader, 0):
             images, captions, lengths = data
+            images = images.to(Config.get("device"))
+            captions = captions.to(Config.get("device"))
             #image features
             image_features = self.encoder(images)
             #predicted captions
@@ -76,6 +84,8 @@ class ImageCaptioning:
     def testing(self):
         for _, data in enumerate(self.testing_loader, 0):
             images, captions, lengths = data
+            images = images.to(Config.get("device"))
+            captions = captions.to(Config.get("device"))
             #image features
             image_features = self.encoder(images)
             #predicted captions

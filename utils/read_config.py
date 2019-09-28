@@ -1,15 +1,23 @@
 import configparser
 import logging
 from config import Config
+import torch
 
 logger = logging.getLogger('captioning')
 
-def read_config(file_path):
+def reading_config(file_path):
     config = configparser.ConfigParser()
     config.read(file_path)
-    logger.info("Reading the config file from: %s" % file_path)
+    logger.info('Reading the config file from: %s' % file_path)
 
     #GPUs
+    Config.set("disable_cuda", config.getboolean("GPU", "disable_cuda", fallback=False))
+    if not Config.get("disable_cuda") and torch.cuda.is_available():
+        Config.set("device", "cuda")
+        logger.info('GPU is available')
+    else:
+        Config.set("device", "cpu")
+        logger.info('Only CPU is available')
 
     #paths
     Config.set("images_dir", config.get("paths", "images_dir"))
