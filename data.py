@@ -116,7 +116,7 @@ class Flickr8k(Dataset):
         caption = self.captions[index]
         im_id = self.image_ids[index]
         lengths = self.lengths[index]
-        im = Image.open('../Flickr8k_Dataset/Flickr8k_images/Flickr8k_images/' + im_id)
+        im = Image.open(self.dataset_directory / 'Flickr8k_images' /   im_id)
         if self.transform is not None:
             im = self.transform(im)
             

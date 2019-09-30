@@ -22,7 +22,7 @@ def save_checkpoint(epoch, outdir, encoder, decoder, optimizer, criterion,
     Return
     ------
     """
-    filename = outdir +  '/' +  filename
+    filename = outdir / filename
     torch.save({'epoch': epoch,
                 'encoder': encoder.state_dict(),
                 'decoder': decoder.state_dict(),
@@ -43,11 +43,10 @@ def load_checkpoint(checkpoint_file):
     - checkpoint
     """
     checkpoint = None
-    checkpoint_file = Path(checkpoint_file)
-    if checkpoint_file.exists():
-        logger.info('Loading the checkpoint file')
+    try:
         checkpoint = torch.load(checkpoint_file)
-    else:
-        logger.info('Checkpoint file doesnot exist')
+        logger.info('Loading the checkpoint file')
+    except:
+        logger.info('Checkpoint file does not exist')
     
     return checkpoint

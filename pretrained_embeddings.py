@@ -8,7 +8,7 @@ import logging
 
 logger = logging.getLogger("captioning")
 
-def load_pretrained_embeddings(pretrained_emb_path):
+def load_pretrained_embeddings(pretrained_emb_path, captions_path):
     """
     loads the pretrained word2vec and initialzes the words from vocabulary using the embeddings
 
@@ -20,9 +20,8 @@ def load_pretrained_embeddings(pretrained_emb_path):
     ------
     - words of vocabulary initialized from pretrained word2vec embeddings
     """
-    logger.info("Loading the pretrained embeddings")
+    logger.info("Loading the pretrained embeddings ...")
     emb_dim = Config.get("pretrained_emb_dim")
-    captions_path = Config.get("captions_dir")
     #laoding pretrained embeddings
     word_vectors = KeyedVectors.load_word2vec_format(pretrained_emb_path, binary=False)
     #reading the captions
@@ -45,5 +44,6 @@ def load_pretrained_embeddings(pretrained_emb_path):
     embeddings = nn.Embedding.from_pretrained(pretrained_embeddings)
     #deleting the loaded word2vec embedding
     del word_vectors
+    logger.info("loaded the pretrained embeddings")
 
     return embeddings
