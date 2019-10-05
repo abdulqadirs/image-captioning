@@ -20,10 +20,12 @@ logger = logging.getLogger('captioning')
 def main():
 
     #parsing the arguments
-    args = parse_arguments()
+    #args = parse_arguments()
    
     #setup logging
-    output_dir = Path(args.output_directory)
+    #output_dir = Path('/content/drive/My Drive/image-captioning/output')
+    output_dir = Path('output')
+    #output_dir = Path(args.output_directory)
     logfile_path = output_dir / "output.log"
     setup_logging(logfile_path, logging.INFO)
 
@@ -35,14 +37,18 @@ def main():
     tensorboard_writer = SummaryWriter(output_dir / 'train')
     
     #load dataset
-    dataset_dir = Path(args.dataset)
+    #dataset_dir = Path('/content/drive/My Drive/Flickr8k_Dataset')
+    dataset_dir = Path('../Flickr8k_Dataset')
+    #dataset_dir = Path(args.dataset)
     images_path = Config.get("images_dir")
     captions_path = Config.get("captions_dir")
     training_loader, validation_loader, testing_loader = data_loaders(dataset_dir / images_path,
                                                                      dataset_dir / captions_path)
 
     #load pretrained embeddings
-    pretrained_emb_dir = Path(args.pretrained_embeddings)
+    #pretrained_emb_dir = Path('/content/drive/My Drive/word2vec')
+    pretrained_emb_dir = Path('../word2vec')
+    #pretrained_emb_dir = Path(args.pretrained_embeddings)
     pretrained_emb_file = Config.get("pretrained_emb_path")
     pretrained_embeddings = load_pretrained_embeddings(pretrained_emb_dir / pretrained_emb_file, 
                                                         dataset_dir / captions_path)
@@ -69,6 +75,12 @@ def main():
     checkpoint_file = Config.get("checkpoint_file")
     checkpoint_captioning = load_checkpoint(output_dir / checkpoint_file)
 
+    #using available device(gpu/cpu)
+    encoder = encoder.to(Config.get("device"))
+    decoder = decoder.to(Config.get("device"))
+    pretrained_embeddings = pretrained_embeddings.to(Config.get("device"))
+        
+
     start_epoch = 1
     if checkpoint_captioning is not None:
         start_epoch = checkpoint_captioning['epoch'] + 1
@@ -86,11 +98,10 @@ def main():
     
     #training
     validate_every = Config.get("validate_every")
-    model.train(epochs, validate_every, start_epoch)
-
-    #validation
+    #model.train(epochs, validate_every, start_epoch)
 
     #testing
+    model.testing(id_to_word, dataset_dir / images_path / images_path)
 
 
 

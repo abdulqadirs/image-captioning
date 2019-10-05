@@ -1,6 +1,7 @@
 import torch
 from pathlib import Path
 import logging
+from config import Config
 
 logger = logging.getLogger("captioning")
 
@@ -44,7 +45,7 @@ def load_checkpoint(checkpoint_file):
     """
     checkpoint = None
     try:
-        checkpoint = torch.load(checkpoint_file)
+        checkpoint = torch.load(checkpoint_file, map_location=Config.get("device"))
         logger.info('Loading the checkpoint file')
     except:
         logger.info('Checkpoint file does not exist')

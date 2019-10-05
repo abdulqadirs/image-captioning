@@ -120,7 +120,7 @@ class Flickr8k(Dataset):
         if self.transform is not None:
             im = self.transform(im)
             
-        return im, torch.LongTensor(caption), lengths
+        return im, torch.LongTensor(caption), lengths, im_id
 
     def __len__(self):
         return len(self.image_ids)
@@ -172,12 +172,12 @@ def data_loaders(images_path, captions_path):
 
     validation_loader = DataLoader(flickr8k_dataset,
                         num_workers = 1,
-                        batch_size = 2,
+                        batch_size = 1,
                         sampler= valid_sampler)
 
     testing_loader = DataLoader(flickr8k_dataset,
                         num_workers = 1,
-                        batch_size = 2,
+                        batch_size = 1,
                         sampler= test_sampler)
 
     return training_loader, validation_loader, testing_loader
