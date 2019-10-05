@@ -30,7 +30,7 @@ def main():
     setup_logging(logfile_path, logging.INFO)
 
     #setup and read config.ini
-    config_file = 'config.ini'
+    config_file = '../config.ini'
     reading_config(config_file)
 
     #tensorboard
@@ -38,7 +38,7 @@ def main():
     
     #load dataset
     #dataset_dir = Path('/content/drive/My Drive/Flickr8k_Dataset')
-    dataset_dir = Path('../Flickr8k_Dataset')
+    dataset_dir = Path('../../Flickr8k_Dataset')
     #dataset_dir = Path(args.dataset)
     images_path = Config.get("images_dir")
     captions_path = Config.get("captions_dir")
@@ -47,7 +47,7 @@ def main():
 
     #load pretrained embeddings
     #pretrained_emb_dir = Path('/content/drive/My Drive/word2vec')
-    pretrained_emb_dir = Path('../word2vec')
+    pretrained_emb_dir = Path('../../word2vec')
     #pretrained_emb_dir = Path(args.pretrained_embeddings)
     pretrained_emb_file = Config.get("pretrained_emb_path")
     pretrained_embeddings = load_pretrained_embeddings(pretrained_emb_dir / pretrained_emb_file, 
