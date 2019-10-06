@@ -2,17 +2,14 @@ from nltk.translate.bleu_score import SmoothingFunction, sentence_bleu
 
 def bleu_score(reference_caption, predicted_caption):
     """
-    calculates the bleu score using nltk
-    (calculates for one caption at a time)
+    Calculates the bleu score using nltk (one caption at a time)
 
-    Params
-    ------
-    - reference_caption: ground trugh
-    - predicted_caption: the caption predicted by the model
+    Args:
+        reference_caption (tensor): ground truth
+        predicted_caption (tensor): the caption predicted by the model
 
-    Return
-    ------
-    - bleu score 
+    Returns:
+        bleu (float): bleu score(0-1)
     """
 
     reference_caption = reference_caption.squeeze(0)

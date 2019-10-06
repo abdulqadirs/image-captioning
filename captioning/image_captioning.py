@@ -13,6 +13,21 @@ from decode_caption.save_captions import save_captions
 logger = logging.getLogger("captioning")
 
 class ImageCaptioning:
+    """
+    Runs the model on training, validation and test datasets.
+
+    Attribute:
+        encoder (object): Images encoder.
+        decoder (object): Decodes the encoded images to captions.
+        optimizer (object): Gradient descent optimizer.
+        criterion (object): Loss function.
+        training_loader:
+        validation_loader:
+        testing_loader:
+        pretrained_embeddings:
+        output_dir (Path):
+        tensorboard_writer (object):
+    """
     def __init__(self, encoder, decoder, optimizer, criterion, 
                 traing_loader, validation_loader, testing_loader,
                  pretrained_embeddings, output_dir, tensorboard_writer):
@@ -30,7 +45,12 @@ class ImageCaptioning:
 
     def train(self,epochs, validate_every, start_epoch):
         """
-        training to generate captions for given images
+        Runs the model on training dataset.
+        
+        Args:
+            epochs (int): Total epochs.
+            validate_every (int): Run validation after every validate_every no of epochs.
+            start_epoch (int): Starting epoch if using the stored checkpoint.
         """
         for epoch in range(start_epoch, epochs + 1):
             training_batch_losses = []
@@ -71,7 +91,10 @@ class ImageCaptioning:
     
     def validation(self, epoch):
         """
-        validation
+        Runs the model on validation dataset.
+
+        Args:
+            epoch (int): Current epoch.
         """
         validation_losses = []
         raw_bleu_score = []
@@ -104,7 +127,11 @@ class ImageCaptioning:
 
     def testing(self, id_to_word, images_dir):
         """
-        testing
+        Runs the model on test dataset.
+
+        Args:
+            id_to_word (list):
+            images_dir (Path): Path of images dataset directory.
         """
         raw_bleu_score = []
         for _, data in tqdm(enumerate(self.testing_loader, 0)):

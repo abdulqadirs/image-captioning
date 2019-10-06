@@ -2,6 +2,12 @@ from argparse import ArgumentParser, Namespace, RawTextHelpFormatter
 from pathlib import Path
 
 def parse_arguments():
+    """
+    Parses the arguments passed through the terminal.
+
+    Returns:
+        The arguments passed through the terminal.
+    """
     parser = ArgumentParser(formatter_class=RawTextHelpFormatter)
     parser.add_argument('-d', '--dataset', help='Dataset directory')
     parser.add_argument('-o', '--output_directory', help='Directory where to output artifacts')

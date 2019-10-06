@@ -10,16 +10,20 @@ logger = logging.getLogger("captioning")
 
 def load_pretrained_embeddings(pretrained_emb_path, captions_path):
     """
-    loads the pretrained word2vec and initialzes the words from vocabulary using the embeddings
+    Loads the pretrained word2vec and initialzes the words from vocabulary using the embeddings.
 
-    Params
-    ------
-    - prtrained_emb_path: path of the word2vec file
+    Args:
+        pretrained_emb_path (Path): Path of the word2vec file.
+        captions_path (Path): Path of the file containing captions.
 
-    Return
-    ------
-    - words of vocabulary initialized from pretrained word2vec embeddings
+    Returns:
+        Words of vocabulary initialized from pretrained word2vec embeddings.
+    
+    Raises:
+        FileNotFoundError: If the captions or pretrained word embeddings file doesn't exist.
     """
+    # TODO (aq): Check if the file paths are valid or not.
+    # TODO (aq): Determine the dimensions of the embeddings on run time(not from the config file)
     logger.info("Loading the pretrained embeddings ...")
     emb_dim = Config.get("pretrained_emb_dim")
     #laoding pretrained embeddings
@@ -44,6 +48,6 @@ def load_pretrained_embeddings(pretrained_emb_path, captions_path):
     embeddings = nn.Embedding.from_pretrained(pretrained_embeddings)
     #deleting the loaded word2vec embedding
     del word_vectors
-    logger.info("loaded the pretrained embeddings")
+    logger.info("Loaded the pretrained embeddings.")
 
     return embeddings

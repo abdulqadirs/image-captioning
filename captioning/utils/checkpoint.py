@@ -7,21 +7,16 @@ logger = logging.getLogger("captioning")
 
 def save_checkpoint(epoch, outdir, encoder, decoder, optimizer, criterion, 
                     filename = 'checkpoint.ImageCaptioning.pth.tar'):
-    
     """
-    saves the encoder and decoder checkpoint
+    Saves the encoder and decoder checkpoint
 
-    Params
-    ------
-    - epoch: current epoch
-    - outdir: directory to output checkpoint
-    - encoder: the encoder to save
-    - decoder: the decoder to save
-    - optimizer: optimizer for the model
-    - filename: for checkpoint in outdir
-
-    Return
-    ------
+    Args:
+        epoch (int): current epoch
+        outdir (Path): directory to output checkpoint
+        encoder (object): the encoder to save
+        decoder (object): the decoder to save
+        optimizer (object): optimizer for the model
+        filename (Path): for checkpoint in outdir
     """
     filename = outdir / filename
     torch.save({'epoch': epoch,
@@ -33,21 +28,23 @@ def save_checkpoint(epoch, outdir, encoder, decoder, optimizer, criterion,
 
 def load_checkpoint(checkpoint_file):
     """
-    Loads the checkpoint of the model
+    Loads the checkpoint of the epoch, encoder, decoder, optimizer
     
-    Params
-    ------
-    - checkpoint_file: file name of latest checkpoint file
+    Args:
+        checkpoint_file (Path): file name of latest checkpoint file
 
-    Return
-    ------
-    - checkpoint
+    Returns:
+        checkpoint (dict):
+    
+    Raises:
+        warning: If the checkpoint file doesn't exist.
+
     """
     checkpoint = None
     try:
         checkpoint = torch.load(checkpoint_file, map_location=Config.get("device"))
         logger.info('Loading the checkpoint file')
     except:
-        logger.info('Checkpoint file does not exist')
+        logger.warning('Checkpoint file does not exist')
     
     return checkpoint

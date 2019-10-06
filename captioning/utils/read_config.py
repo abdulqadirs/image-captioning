@@ -6,6 +6,16 @@ import torch
 logger = logging.getLogger('captioning')
 
 def reading_config(file_path):
+    """
+    Reads the config settings from config file and makes them accessible to the project using config.py module.
+
+    Args:
+        file_path (Path): The path of config file.
+    
+    Raises:
+        FileNotFoundError: If the config file doesn't exist.
+    """
+    # TODO (aq): Raise Error if file doesn't exist. 
     config = configparser.ConfigParser()
     config.read(file_path)
     logger.info('Reading the config file from: %s' % file_path)

@@ -3,6 +3,19 @@ import logging
 logger = logging.getLogger("captioning")
 
 class Statistics:
+    """
+    Recods the losses and evaluation metrics.
+    Writes the losses and evaluation metrics to tensorboard.
+    Logs the losses and evaluation metrics.
+
+    Attributes:
+        training_losses (list):
+        validation_losses (list):
+        testing_losses (list):
+        bleu_score (list): evaluation metric
+        tensorboard_writer (object):
+        outdir (Path): output directory to store tensorboard log files.
+    """
     def __init__(self, outdir, tensorboard_writer):
         self.training_losses = []
         self.validation_losses = []
@@ -13,7 +26,7 @@ class Statistics:
     
     def record(self, training_losses = None, validation_losses = None, testing_losses = None, bleu_score = None):
         """
-        stores the statistics in lists
+        Stores the statistics in lists.
         """
         self.training_losses.append(training_losses) if training_losses is not None else {}
         self.validation_losses.append(validation_losses) if validation_losses is not None else {}
@@ -22,7 +35,7 @@ class Statistics:
     
     def log_eval(self, epoch, dataset_name):
         """
-        ouput the evaluation metrics
+        Ouput the evaluation metrics to stout and logfile.
         """
         if dataset_name == "testing":
             logger.info("Average BLEU Score on Test Dataset")
@@ -33,13 +46,13 @@ class Statistics:
 
     def log_losses(self, epoch):
         """
-        outputs the loss of given epoch
+        Outputs the loss of given epoch to stout and logfile.
         """
         logger.info("At epoch {}. Train Loss: {}".format(epoch, self.training_losses[-1]))
     
     def push_tensorboard_losses(self, epoch):
         """
-        output losses to tensorboard
+        Output losses to tensorboard.
         """
         if self.training_losses:
             self.tensorboard_writer.add_scalar('losses/train', self.training_losses[-1], epoch)
@@ -50,6 +63,6 @@ class Statistics:
     
     def push_tensorboard_eval(self, epoch, dataset_name):
         """
-        output the bleu score to tensorboard
+        Output the bleu score to tensorboard.
         """
         self.tensorboard_writer.add_scalar(dataset_name + "/BLEU", self.bleu_score[-1], epoch)

@@ -6,15 +6,12 @@ def greedy_search(predicted_captions):
     (batch_size, captions_length, vocab_length) to (batch_size, captions_length)
     by selecting the words of vocabulary with max(probability)
 
-    Params
-    ------
-    - predicted_captions: captions predicted by model of shape(batch_size, captions_length, vocab_length)
+    Args:
+        predicted_captions (tensor): captions predicted by model of shape(batch_size, captions_length, vocab_length)
 
-    Return
-    ------
-    -tokenized_caption: tokenized captions of shape (batch_size, captions_length)
+    Returns:
+        tokenized_caption (list): tokenized captions of shape (batch_size, captions_length)
     """
-
     batch_size, captions_length, vocab_length = predicted_captions.size()
     tokenized_caption = []
     for i in range(batch_size):
@@ -23,4 +20,3 @@ def greedy_search(predicted_captions):
             tokenized_caption.append(indices.item())
     
     return tokenized_caption
-

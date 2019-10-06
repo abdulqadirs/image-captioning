@@ -15,16 +15,18 @@ logger = logging.getLogger('captioning')
                                                                 
 def read_captions(path):
     """
-    Reads the captions of images, strips and appends <start> & <end> tokens
+    Reads the captions of images, strips and appends <start> & <end> tokens.
 
-    Params
-    -----
-    - path: path of the file containing captions of images
+    Args:
+        path (Path): Path of the file containing captions of images.
 
-    Returns
-    -------
-    - a dictionary of {image_ids: list of captions}
+    Returns:
+        A dictionary of {image_ids: list of captions}
+    
+    Raises:
+        FileNotFoundError: If the file containing captions doesn't exist.
     """
+    # TODO (aq): Raise error if the captioning file path is invalid.
     raw_captions_file = open(path, 'r').read().strip().split('\n')
     raw_captions = {}
     for line in raw_captions_file:
@@ -40,17 +42,15 @@ def read_captions(path):
 
 def dictionary(raw_captions,threshold):
     """
-    Constructs the dictionary of words in captions based on frequency of each word
+    Constructs the dictionary of words in captions based on frequency of each word.
     
-    Params
-    ------
-    - raw_captions: dictionary of {image_ids: [image captions]}
-    - threshold: words from image captions are included in dictionary if frequency of words >= threshold
+    Args:
+        raw_captions (dict): Dictionary of {image_ids: [image captions]}.
+        threshold (int): Words from image captions are being included in dictionary if frequency of words >= threshold.
 
-    Returns
-    -------
-    - list of words in dictionary indexed by id
-    - dictionary of {word: id}
+    Returns:
+            id_to_word (list): list of words in dictionary indexed by id.
+            word_to_id (dict): dictionary of {word: id}.
     """
     caps = []
     for im in raw_captions:
@@ -68,16 +68,14 @@ def tokenization(raw_captions, word_to_id):
     """
     Represents the raw captions by list of ids in the dictionary
 
-    Params
-    ------
-    - raw_captions: a dictionary of {image_ids: list of captions}
-    - word_to_id: dictionary of {word: id}
+    Args:
+        raw_captions (dict): A dictionary of {image_ids: list of captions}.
+        word_to_id (dict): A dictionary of {word: id}.
 
-    Returns
-    -------
-    - captions (list of ids of word from dictionary)
-    - image ids
-    - actual length of each caption
+    Returns:
+        captions(list): List of ids of word from dictionary.
+        image ids(str): Name of image files without extension.
+        lengths(list): Actual length of each caption.
     """
     tokens, image_ids = [], []
     maxlen = 20
@@ -104,6 +102,9 @@ def tokenization(raw_captions, word_to_id):
 
 
 class Flickr8k(Dataset):
+    """
+    Loads the dataset.
+    """
     def __init__(self,captions_path, dataset_directory, transform):
         self.dataset_directory = dataset_directory
         self.captions_path = captions_path
@@ -113,6 +114,20 @@ class Flickr8k(Dataset):
         self.transform = transform
 
     def __getitem__(self, index):
+        """
+        Reads images and returns data.
+        Applies the transformations.
+        
+        Returns:
+            im (tensor): Images
+            caption (tensor): Captions
+            lengths (list): Actual lengths of captions.
+            im_id (list): Name of image files without extension.
+        
+        Raises:
+            FileNotFoundError: If the images directory path is invalid.
+        """
+        # TODO (aq): Raise error if the files doesn't exist.
         caption = self.captions[index]
         im_id = self.image_ids[index]
         lengths = self.lengths[index]
@@ -128,20 +143,17 @@ class Flickr8k(Dataset):
 
 def data_loaders(images_path, captions_path):
     """
-    Loads the data and divides it into training, validation and test sets using samples
+    Loads the data and divides it into training, validation and test sets 
+    using samples and Flickr8k Class.
 
-    Params
-    ------
-    - images_path:
-    - captions_path:
+    Args:
+        images_path (Path): Path of images.
+        captions_path (Path): Path of captions file.
 
-    Returns
-    -------
-    - training data loader
-    - validation data loader
-    - testing data loader
-
-
+    Returns:
+        training_data_loader
+        validation_data_loader
+        testing_data_loader
     """
     images_dir = images_path
     dataset_folder = datasets.ImageFolder(root = images_dir)
