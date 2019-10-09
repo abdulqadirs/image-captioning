@@ -1,7 +1,8 @@
 import configparser
 import logging
-from config import Config
 import torch
+
+from config import Config
 
 logger = logging.getLogger('captioning')
 
@@ -17,8 +18,11 @@ def reading_config(file_path):
     """
     # TODO (aq): Raise Error if file doesn't exist. 
     config = configparser.ConfigParser()
-    config.read(file_path)
-    logger.info('Reading the config file from: %s' % file_path)
+    try:
+        config.read(file_path)
+        logger.info('Reading the config file from: %s' % file_path)
+    except FileNotFoundError:
+        logger.exception("Config file doesn't exist.")
 
     #GPUs
     Config.set("disable_cuda", config.getboolean("GPU", "disable_cuda", fallback=False))
@@ -53,10 +57,10 @@ def reading_config(file_path):
 
     #validation
     Config.set("validation_batch_size", config.getint("validation", "batch_size", fallback=2))
-    Config.set("validate_every", config.getint("validation", "validate_every", fallback=5))
+    Config.set("validate_every", config.getint("validation", "validate_every", fallback=10))
 
     #testing
-
+    Config.set("testing_batch_size", config.getint("testing", "batch_size", fallback=1))
 
     #logging
     Config.set("logfile", config.get("logging", "logfile", fallback="output.log"))

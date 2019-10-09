@@ -1,10 +1,11 @@
 import torch
 import numpy as np
+import logging
+from tqdm import tqdm
+
 from utils.checkpoint import save_checkpoint
 from config import Config
-import logging
 from utils.stats import Statistics
-from tqdm import tqdm
 from metrics.bleu import bleu_score
 from decode_caption.detokenize import detokenize_caption
 from decode_caption.greedy_search import greedy_search
@@ -52,6 +53,7 @@ class ImageCaptioning:
             validate_every (int): Run validation after every validate_every no of epochs.
             start_epoch (int): Starting epoch if using the stored checkpoint.
         """
+        self.validation(epoch = 0)
         for epoch in range(start_epoch, epochs + 1):
             training_batch_losses = []
             for _, data in tqdm(enumerate(self.training_loader, 0)):
@@ -78,8 +80,7 @@ class ImageCaptioning:
             self.stat.push_tensorboard_losses(epoch)
             self.stat.log_losses(epoch)
             if (epoch -1) % validate_every == 0:
-
-                self.validation(epoch)
+                self.validation(epoch = epoch)
                 save_checkpoint(epoch = epoch,
                                 outdir = self.output_dir,
                                 encoder = self.encoder,
@@ -89,7 +90,7 @@ class ImageCaptioning:
 
 
     
-    def validation(self, epoch):
+    def validation(self, epoch = None):
         """
         Runs the model on validation dataset.
 

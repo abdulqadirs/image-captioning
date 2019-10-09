@@ -1,9 +1,10 @@
 import logging
+from pathlib import Path
 
 LOG_LEVEL = logging.INFO
 logger = logging.getLogger("captioning")
 
-def setup_logging(logfile, level):
+def setup_logging(logfile = None):
     """
     Sets up logging to stout and to the given file
 
@@ -17,13 +18,18 @@ def setup_logging(logfile, level):
     global logger
     logger.propagate = False
     formatter = logging.Formatter('%(asctime)s: %(levelname)s: %(message)s', "%H:%M:%S")
-    logger.setLevel(level)
+    logger.setLevel(logging.INFO)
     streamhandler = logging.StreamHandler()
-    streamhandler.setLevel(level)
+    streamhandler.setLevel(logging.INFO)
     streamhandler.setFormatter(formatter)
     logger.addHandler(streamhandler)
-    # TODO (aq): Raise error if the file path is invalid or file doesn't exist.
-    filehandler = logging.FileHandler(logfile)
-    filehandler.setLevel(level)
-    filehandler.setFormatter(formatter)
-    logger.addHandler(filehandler)
+
+    if logfile:
+        try:
+            filehandler = logging.FileHandler(logfile)
+        except FileNotFoundError as e:
+            logger.warning(e)
+        else:
+            filehandler.setLevel(logging.INFO)
+            filehandler.setFormatter(formatter)
+            logger.addHandler(filehandler)

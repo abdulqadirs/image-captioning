@@ -11,6 +11,8 @@ import torchvision.transforms as transforms
 from torch.utils.data.sampler import SubsetRandomSampler
 import logging
 
+from config import Config
+
 logger = logging.getLogger('captioning')
                                                                 
 def read_captions(path):
@@ -26,18 +28,22 @@ def read_captions(path):
     Raises:
         FileNotFoundError: If the file containing captions doesn't exist.
     """
-    # TODO (aq): Raise error if the captioning file path is invalid.
-    raw_captions_file = open(path, 'r').read().strip().split('\n')
-    raw_captions = {}
-    for line in raw_captions_file:
-        line = line.strip(' .')
-        line = line.split('\t')
-        img_id, caption = line[0][:len(line[0])-2], line[1]
-        if img_id not in raw_captions:
-            raw_captions[img_id] = ['<start> ' + caption + ' <end>']
-        else:
-            raw_captions[img_id].append('<start> ' + caption + ' <end>')
-    return raw_captions
+    try:
+        raw_captions_file = open(path, 'r').read().strip().split('\n')
+    except FileNotFoundError:
+        logger.exception("Traceback of captions file '{}' not found.".format(path))
+    else:
+        raw_captions = {}
+        for line in raw_captions_file:
+            line = line.strip(' .')
+            line = line.split('\t')
+            img_id, caption = line[0][:len(line[0])-2], line[1]
+            if img_id not in raw_captions:
+                raw_captions[img_id] = ['<start> ' + caption + ' <end>']
+            else:
+                raw_captions[img_id].append('<start> ' + caption + ' <end>')
+
+        return raw_captions
 
 
 def dictionary(raw_captions,threshold):
@@ -179,17 +185,17 @@ def data_loaders(images_path, captions_path):
 
     training_loader = DataLoader(flickr8k_dataset,
                         num_workers = 1,
-                        batch_size = 2,
+                        batch_size = Config.get("training_batch_size"),
                         sampler= train_sampler)
 
     validation_loader = DataLoader(flickr8k_dataset,
                         num_workers = 1,
-                        batch_size = 1,
+                        batch_size = Config.get("validation_batch_size"),
                         sampler= valid_sampler)
 
     testing_loader = DataLoader(flickr8k_dataset,
                         num_workers = 1,
-                        batch_size = 1,
+                        batch_size = Config.get("testing_batch_size"),
                         sampler= test_sampler)
 
     return training_loader, validation_loader, testing_loader
