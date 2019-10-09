@@ -11,11 +11,16 @@ class Encoder(nn.Module):
     Attributes:
         embed_size (int): The size of image embedding returned by CNN.
     """
-    def __init__(self, embed_size):
+    def __init__(self, embed_size, feature_extraction):
         super(Encoder, self).__init__()
         self.embed_size = embed_size
         #pretrained model
         self.resnet18 = vision_models.resnet18(pretrained=True)
+        # fine-tuning or feature extraction
+        if feature_extraction:
+            for param in self.resnet18.parameters():
+                param.requires_grad = False
+                
         #replace the classifier with a fully connected embedding layer
         self.resnet18.classifier = nn.Linear(in_features=1000,  out_features=1000)
         #adding another fully connected layer

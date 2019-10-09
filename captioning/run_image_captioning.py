@@ -52,10 +52,11 @@ def main():
     hidden_size = Config.get("decoder_hidden_size")
     batch_size = Config.get("training_batch_size")
     epochs = Config.get("epochs")
+    feature_extraction = Config.get("feature_extraction")
     raw_captions = read_captions(captions_path)
     id_to_word, word_to_id = dictionary(raw_captions, threshold = 5)
     vocab_size = len(id_to_word)
-    encoder = Encoder(embed_size)
+    encoder = Encoder(embed_size, feature_extraction)
     decoder = Decoder(embed_size, hidden_size, vocab_size, batch_size)
 
     #load pretrained embeddings
@@ -103,8 +104,6 @@ def main():
     elif args.testing:
         images_path = Path(images_path / Config.get("images_dir"))
         model.testing(id_to_word, images_path)
-
-
 
 
 if __name__ == "__main__":
