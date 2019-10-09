@@ -1,7 +1,5 @@
 # Image Captioning
-Image Captioning
-
-Implementation of image captioning using CNN encoder and LSTM decoder.
+Implementation of image captioning using CNN encoder and LSTM decoder on Flickr8k dataset.
 
 ## Prerequisites
 * Python 3.6
