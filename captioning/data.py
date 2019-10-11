@@ -84,7 +84,7 @@ def tokenization(raw_captions, word_to_id):
         lengths(list): Actual length of each caption.
     """
     tokens, image_ids = [], []
-    maxlen = 20
+    #maxlen = 20
     lengths = []
     for img_id in raw_captions:
         for cap in raw_captions[img_id]:
@@ -95,17 +95,61 @@ def tokenization(raw_captions, word_to_id):
                 else:
                     token.append(word_to_id['<unk>'])
             lengths.append(len(token))
-            if len(token) > maxlen:
-                token = token[:maxlen]
-            else:
-                token += [0] * (maxlen-len(token))
+            #if len(token) > maxlen:
+            #    token = token[:maxlen]
+            #else:
+            #    token += [0] * (maxlen-len(token))
             tokens.append(token)
             image_ids.append(img_id)
-    tokens = np.array(tokens).astype('int32')
+    #tokens = np.array(tokens).astype('int32')
     image_ids = np.array(image_ids)
     
     return tokens, image_ids, lengths
 
+
+class PadSequence(object):
+    """
+    Pads the unequal sequences with zeros in a batch to make them equal to the largest sequence in the batch.
+    Also sorts them in descending order.
+    """
+    def __call__(self, batch):
+        images = [item[0] for item in batch]
+        captions = [item[1] for item in batch]
+        lengths = [item[2] for item in batch]
+        image_ids = [item[3] for item in batch]
+        max_length = max(lengths)
+        if len(lengths) > 1:
+            for caption in captions:
+                if len(caption) < max_length:
+                    pad = [0] * (max_length - len(caption))
+                    caption += pad
+        
+            images, captions, lengths = self.sort(images, captions, lengths)
+        return torch.stack(images), torch.LongTensor(captions), lengths, image_ids
+    
+    def sort(self, images, padded_captions, lengths):
+        """
+        Sorts in 'lengths' of captions in descending order.
+        Then sorts the images and captions according to the sorted 'lengths'.
+
+        Args:
+            images (list of tensors):
+            padded_captions (list):
+            lengths (list):
+        
+        Returns:
+            Sorted lengths, images and captions in descending order according to the lengths of captions.
+        """
+    
+        lengths = torch.tensor(lengths)
+        lengths, indices = torch.sort(lengths, descending=True)
+        sorted_captions = []
+        sorted_images = []
+        for index in indices:
+            sorted_captions.append(padded_captions[index])
+            sorted_images.append(images[index])
+        return sorted_images, sorted_captions, lengths
+  
 
 class Flickr8k(Dataset):
     """
@@ -141,7 +185,7 @@ class Flickr8k(Dataset):
         if self.transform is not None:
             im = self.transform(im)
             
-        return im, torch.LongTensor(caption), lengths, im_id
+        return im, caption, lengths, im_id
 
     def __len__(self):
         return len(self.image_ids)
@@ -182,20 +226,25 @@ def data_loaders(images_path, captions_path):
     train_sampler = SubsetRandomSampler(train_indices)
     valid_sampler = SubsetRandomSampler(valid_indices)
     test_sampler = SubsetRandomSampler(test_indices)
+    
+    collate = PadSequence()
 
     training_loader = DataLoader(flickr8k_dataset,
                         num_workers = 1,
                         batch_size = Config.get("training_batch_size"),
-                        sampler= train_sampler)
+                        sampler = train_sampler,
+                        collate_fn = collate)
 
     validation_loader = DataLoader(flickr8k_dataset,
                         num_workers = 1,
                         batch_size = Config.get("validation_batch_size"),
-                        sampler= valid_sampler)
+                        sampler = valid_sampler,
+                        collate_fn = collate)
 
     testing_loader = DataLoader(flickr8k_dataset,
                         num_workers = 1,
                         batch_size = Config.get("testing_batch_size"),
-                        sampler= test_sampler)
+                        sampler= test_sampler,
+                        collate_fn = collate)
 
     return training_loader, validation_loader, testing_loader

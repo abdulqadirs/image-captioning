@@ -1,5 +1,7 @@
 import torch
 import torch.nn as nn
+from torch.nn.utils.rnn import pack_padded_sequence
+from torch.nn.utils.rnn import pad_packed_sequence
 
 class Decoder(nn.Module):
     """
@@ -21,8 +23,6 @@ class Decoder(nn.Module):
         self.num_layers = num_layers
         self.max_seq_length=20
         self.batch_size = batch_size
-        # embedding layer
-        #self.embed = nn.Embedding(num_embeddings=self.vocab_size, embedding_dim=self.embed_dim)
         
         # Applies a multi-layer long short-term memory (LSTM) RNN to an input sequence.
         self.lstm = nn.LSTM(input_size=self.embed_dim, hidden_size=self.no_lstm_units, num_layers = self.num_layers,
@@ -34,7 +34,7 @@ class Decoder(nn.Module):
         # activations
         self.softmax = nn.Softmax(dim=0)
   
-    def forward(self, features, captions, lenghts, pretrained_embeddings):
+    def forward(self, features, captions, lengths, pretrained_embeddings):
         """
         Decodes the encoded image features to captions.
 
@@ -47,20 +47,18 @@ class Decoder(nn.Module):
         Returns: 
             output (tensor): Predicted captions of shape(batch_size, captions_length, vocab_length)
         """
-        #embed = nn.Embedding.from_pretrained(pretrained_embeddings)
+        #initializing the captions with pretrained embeddings.
         embeddings = pretrained_embeddings(captions)
-        #print(embeddings.shape)
-        #print('features unsqueeze', features.unsqueeze(1).shape)
+        #concatenating the image features with captions' embeddigns.
         embeddings = torch.cat((features.unsqueeze(1), embeddings), 1)
-        #print('embeddings shape after', embeddings.shape)
-        #packed = pack_padded_sequence(embeddings, lengths, batch_first = True)
-        #features = features.unsqueeze(1)
-        #print(features)
-        #features.view(2, 20, self.embed_dim)
-        lstm_output, _ = self.lstm(embeddings)
-        #hiddens, _ = pad_packed_sequence(packed, batch_first=True)
-        lstm_output_reshaped = lstm_output[:,1:,:]
-        outputs = self.fc_out(lstm_output_reshaped)
+        #pack padded sequence
+        packed_embeddings = pack_padded_sequence(embeddings, lengths, batch_first = True)
+        #pass the packed embeddings through LSTM.
+        packed_output, _ = self.lstm(packed_embeddings)
+        #pad the packed embeddings(output of lstm)
+        padded_output, _ = pad_packed_sequence(packed_output, batch_first=True)
+        #lstm_output_reshaped = lstm_output[:,1:,:]
+        outputs = self.fc_out(padded_output)
         #outputs = self.fc_out(lstm_output)
         # batch_size, captions_length, vocab_length = outputs.size()
         # for i in range(batch_size):
