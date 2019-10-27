@@ -49,12 +49,12 @@ def reading_config(file_path):
 
     #decoder
     Config.set("decoder_embed_size", config.getint("decoder", "embed_size", fallback=50))
-    Config.set("decoder_hidden_size", config.getint("decoder", "hidden_size", fallback=20))
+    Config.set("decoder_hidden_size", config.getint("decoder", "hidden_size", fallback=512))
 
     #Training
-    Config.set("training_batch_size", config.getint("training", "batch_size", fallback=16))
+    Config.set("training_batch_size", config.getint("training", "batch_size", fallback=8))
     Config.set("epochs", config.getint("training", "epochs", fallback=1000))
-    Config.set("learning_rate", config.getfloat("training", "learning_rate", fallback=0.001))
+    Config.set("learning_rate", config.getfloat("training", "learning_rate", fallback=0.01))
 
     #validation
     Config.set("validation_batch_size", config.getint("validation", "batch_size", fallback=1))

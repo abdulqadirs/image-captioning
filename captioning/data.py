@@ -124,8 +124,8 @@ class PadSequence(object):
                     pad = [0] * (max_length - len(caption))
                     caption += pad
         
-            images, captions, lengths = self.sort(images, captions, lengths)
-        return torch.stack(images), torch.LongTensor(captions), lengths, image_ids
+            #images, captions, lengths = self.sort(images, captions, lengths)
+        return torch.stack(images), torch.LongTensor(captions), torch.tensor(lengths), image_ids
     
     def sort(self, images, padded_captions, lengths):
         """

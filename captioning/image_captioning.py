@@ -53,7 +53,8 @@ class ImageCaptioning:
             validate_every (int): Run validation after every validate_every no of epochs.
             start_epoch (int): Starting epoch if using the stored checkpoint.
         """
-        self.validation(epoch = 0)
+        #self.validation(epoch = 0)
+        #batch_size = Config.get("training_batch_size")
         for epoch in range(start_epoch, epochs + 1):
             training_batch_losses = []
             for _, data in tqdm(enumerate(self.training_loader, 0)):
@@ -67,7 +68,9 @@ class ImageCaptioning:
                 #image features
                 image_features = self.encoder(images)
                 #predicted captions
-                predicted_captions = self.decoder(image_features, captions, lengths, self.pretrained_embeddings)
+                predicted_captions = self.decoder.teacher_forcing(image_features, captions, lengths, self.pretrained_embeddings)
+                #max_length, _ = lengths.max(0)
+                #ref_captions_mask = torch.ones(batch_size, max_length).to(Config.get("device"))
                 #loss function
                 loss = self.criterion(predicted_captions, captions)
                 #calculating the gradients
@@ -97,8 +100,12 @@ class ImageCaptioning:
         Args:
             epoch (int): Current epoch.
         """
-        validation_losses = []
-        raw_bleu_score = []
+        batch_size = Config.get("validation_batch_size")
+        #validation_losses = []
+        raw_bleu1 = []
+        raw_bleu2 = []
+        raw_bleu3 = []
+        raw_bleu4 = []
         for _, data in tqdm(enumerate(self.validation_loader, 0)):
             images, captions, lengths, _ = data
             images = images.to(Config.get("device"))
@@ -109,19 +116,31 @@ class ImageCaptioning:
             #image features
             image_features = self.encoder(images)
             #predicted captions
-            predicted_captions = self.decoder(image_features, captions, lengths, self.pretrained_embeddings).data.cpu()
-            #loss function
+            predicted_captions, predicted_captions_prob = self.decoder(image_features, lengths, self.pretrained_embeddings)
+            predicted_captions = predicted_captions.data.cpu()
+            predicted_captions_prob = predicted_captions_prob.data.cpu()
+            predicted_captions = predicted_captions.squeeze(0).tolist()
+    
             captions = captions.data.cpu()
-            loss = self.criterion(predicted_captions, captions)
-            validation_losses.append(loss)
+            #max_length, _ = lengths.max(0)
+            #ref_captions_mask = torch.ones(batch_size, max_length).data.cpu()
+             #loss function
+            #loss = self.criterion(predicted_captions_prob, ref_captions_mask)
+            #validation_losses.append(loss)
             #calculating the bleu score
-            tokenized_captions = greedy_search(predicted_captions)
-            bleu = bleu_score(captions, tokenized_captions)
-            raw_bleu_score.append(bleu)
+            #tokenized_captions = greedy_search(predicted_captions)
+            bleu1, bleu2, bleu3, bleu4 = bleu_score(captions, predicted_captions)
+            raw_bleu1.append(bleu1)
+            raw_bleu2.append(bleu2)
+            raw_bleu3.append(bleu3)
+            raw_bleu4.append(bleu4)
 
-        self.stat.record(bleu_score=np.mean(raw_bleu_score))
-        self.stat.record(validation_losses=np.mean(validation_losses))
-        self.stat.push_tensorboard_losses(epoch)
+        self.stat.record(bleu1=np.mean(raw_bleu1))
+        self.stat.record(bleu2=np.mean(raw_bleu2))
+        self.stat.record(bleu3=np.mean(raw_bleu3))
+        self.stat.record(bleu4=np.mean(raw_bleu4))
+        #self.stat.record(validation_losses=np.mean(validation_losses))
+        #self.stat.push_tensorboard_losses(epoch)
         self.stat.push_tensorboard_eval(epoch, "validation")
         self.stat.log_eval(epoch, "validation")
 
@@ -134,7 +153,10 @@ class ImageCaptioning:
             id_to_word (list):
             images_dir (Path): Path of images dataset directory.
         """
-        raw_bleu_score = []
+        raw_bleu1 = []
+        raw_bleu2 = []
+        raw_bleu3 = []
+        raw_bleu4 = []
         for _, data in tqdm(enumerate(self.testing_loader, 0)):
             images, captions, lengths, image_ids = data
             images = images.to(Config.get("device"))
@@ -142,19 +164,27 @@ class ImageCaptioning:
             #image features
             image_features = self.encoder(images)
             #predicted captions
-            predicted_captions = self.decoder(image_features, captions, lengths, self.pretrained_embeddings).data.cpu()
+            predicted_captions, predicted_captions_prob = self.decoder(image_features, lengths, self.pretrained_embeddings)
+            predicted_captions = predicted_captions.data.cpu()
+            predicted_captions_prob = predicted_captions_prob.data.cpu()
             #loss function
-            loss = self.criterion(predicted_captions, captions)
+            #loss = self.criterion(predicted_captions, captions)
             #calculating the bleu score
-            tokenized_caption = greedy_search(predicted_captions)
-            bleu = bleu_score(captions, tokenized_caption)
-            raw_bleu_score.append(bleu)
+            predicted_captions = predicted_captions.squeeze(0).tolist()
+            bleu1, bleu2, bleu3, bleu4 = bleu_score(captions, predicted_captions)
+            raw_bleu1.append(bleu1)
+            raw_bleu2.append(bleu2)
+            raw_bleu3.append(bleu3)
+            raw_bleu4.append(bleu4)
 
             #decoding the predicted captions and saving them
-            detokenized_caption = detokenize_caption(tokenized_caption, id_to_word)
+            detokenized_caption = detokenize_caption(predicted_captions, id_to_word)
             save_captions(images_dir, self.output_dir, image_ids, detokenized_caption)
         
-        self.stat.record(bleu_score=np.mean(raw_bleu_score))
+        self.stat.record(bleu1=np.mean(raw_bleu1))
+        self.stat.record(bleu2=np.mean(raw_bleu2))
+        self.stat.record(bleu3=np.mean(raw_bleu3))
+        self.stat.record(bleu4=np.mean(raw_bleu4))
         epoch = 1
         self.stat.push_tensorboard_eval(epoch, "testing")
         self.stat.log_eval(epoch, "testing")

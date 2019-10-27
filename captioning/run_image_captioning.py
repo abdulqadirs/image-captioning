@@ -4,7 +4,7 @@ import configparser
 from torch.utils.tensorboard import SummaryWriter
 
 from utils.setup_logging import setup_logging
-from loss_function import cross_entropy
+from loss_function import cross_entropy, l1_loss, mse_loss
 from models.encoder import Encoder
 from models.decoder import Decoder
 from image_captioning import ImageCaptioning

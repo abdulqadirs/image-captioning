@@ -12,7 +12,10 @@ class Statistics:
         training_losses (list):
         validation_losses (list):
         testing_losses (list):
-        bleu_score (list): evaluation metric
+        bleu1 (list): evaluation metric
+        bleu2 (list):
+        bleu3 (list):
+        bleu4 (list):
         tensorboard_writer (object):
         outdir (Path): output directory to store tensorboard log files.
     """
@@ -20,29 +23,43 @@ class Statistics:
         self.training_losses = []
         self.validation_losses = []
         self.testing_losses = []
-        self.bleu_score = []
+        self.bleu1 = []
+        self.bleu2 = []
+        self.bleu3 = []
+        self.bleu4 = []
         self.tensorboard_writer = tensorboard_writer
         self.outdir = outdir
     
-    def record(self, training_losses = None, validation_losses = None, testing_losses = None, bleu_score = None):
+    def record(self, training_losses = None, validation_losses = None, testing_losses = None, 
+                bleu1 = None,bleu2 = None, bleu3 = None, bleu4 = None):
         """
         Stores the statistics in lists.
         """
         self.training_losses.append(training_losses) if training_losses is not None else {}
         self.validation_losses.append(validation_losses) if validation_losses is not None else {}
         self.testing_losses.append(testing_losses) if testing_losses is not None else {}
-        self.bleu_score.append(bleu_score) if bleu_score is not None else {}
+        self.bleu1.append(bleu1 * 100) if bleu1 is not None else {}
+        self.bleu2.append(bleu2 * 100) if bleu2 is not None else {}
+        self.bleu3.append(bleu3 * 100) if bleu3 is not None else {}
+        self.bleu4.append(bleu4 * 100) if bleu4 is not None else {}
+
     
     def log_eval(self, epoch, dataset_name):
         """
         Ouput the evaluation metrics to stout and logfile.
         """
         if dataset_name == "testing":
-            logger.info("Average BLEU Score on Test Dataset")
-            logger.info("[Eval: {}] {:6.2f} BLEU ".format(dataset_name, self.bleu_score[-1]))
+            logger.info("[Eval: {}] {:6.2f} BLEU-1 (%)".format(dataset_name, self.bleu1[-1]))
+            logger.info("[Eval: {}] {:6.2f} BLEU-2 (%)".format(dataset_name, self.bleu2[-1]))
+            logger.info("[Eval: {}] {:6.2f} BLEU-3 (%)".format(dataset_name, self.bleu3[-1]))
+            logger.info("[Eval: {}] {:6.2f} BLEU-4 (%)".format(dataset_name, self.bleu4[-1]))
+
         else:
             logger.info("[Eval: {}] Epoch: {} ".format(dataset_name, epoch))
-            logger.info("[Eval: {}] {:6.2f} BLEU ".format(dataset_name, self.bleu_score[-1]))
+            logger.info("[Eval: {}] {:6.2f} BLEU-1 (%)".format(dataset_name, self.bleu1[-1]))
+            logger.info("[Eval: {}] {:6.2f} BLEU-2 (%)".format(dataset_name, self.bleu2[-1]))
+            logger.info("[Eval: {}] {:6.2f} BLEU-3 (%)".format(dataset_name, self.bleu3[-1]))
+            logger.info("[Eval: {}] {:6.2f} BLEU-4 (%)".format(dataset_name, self.bleu4[-1]))
 
     def log_losses(self, epoch):
         """
@@ -65,4 +82,7 @@ class Statistics:
         """
         Output the bleu score to tensorboard.
         """
-        self.tensorboard_writer.add_scalar(dataset_name + "/BLEU", self.bleu_score[-1], epoch)
+        self.tensorboard_writer.add_scalar(dataset_name + "/BLEU-1", self.bleu1[-1], epoch)
+        self.tensorboard_writer.add_scalar(dataset_name + "/BLEU-2", self.bleu2[-1], epoch)
+        self.tensorboard_writer.add_scalar(dataset_name + "/BLEU-3", self.bleu3[-1], epoch)
+        self.tensorboard_writer.add_scalar(dataset_name + "/BLEU-4", self.bleu4[-1], epoch)
