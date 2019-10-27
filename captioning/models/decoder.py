@@ -1,3 +1,5 @@
+#https://github.com/yunjey/pytorch-tutorial/blob/master/tutorials/03-advanced/image_captioning/model.py
+
 import torch
 import torch.nn as nn
 from torch.nn.utils.rnn import pack_padded_sequence
@@ -33,10 +35,51 @@ class Decoder(nn.Module):
     
         # activations
         self.softmax = nn.Softmax(dim=0)
-  
-    def forward(self, features, captions, lengths, pretrained_embeddings):
+    
+    def forward(self, features, lengths, pretrained_embeddings):
         """
-        Decodes the encoded image features to captions.
+        Decodes the encoded image features to captions without teacher foring.
+
+        Args:
+            features (tensor): Encoded image features.
+            lengths (tensor): Actual lengths of captions.
+            pretrained_embeddings (): Word2vec embeddings of words of vocabulary.
+        
+        Returns: 
+            predicted_captions (tensor): Predicted captions of shape(batch_size, captions_length)
+            predicted_captions_prob (tensor): probability of predicted captiosn (batch_size, captions_length)
+        """
+        predicted_caption_ids= []
+        predicted_caption_prob = []
+        inputs = features.unsqueeze(1)
+        #inputs.shape: (batch_size, 1, encoder_ouput_dim)
+        max_seq_length, _ = lengths.max(0)
+        states = None
+        for i in range(max_seq_length):
+            #input = (batch_size, 1, pretrained_emb_dim=encoder_output_dim) 
+            hiddens, states = self.lstm(inputs, states)
+            #hiddens = (batch_size, 1, no_of_lstm_units)
+            outputs = self.fc_out(hiddens)
+            #outputs = (batch_size, 1, vocab_size)
+            outputs = outputs.squeeze(1)
+            #outputs = (batch_size, vocab_size)
+            predicted_values, predicted_indices = outputs.max(1)
+            #predicted = (batch_size)
+            predicted_caption_ids.append(predicted_indices)
+            inputs = pretrained_embeddings(predicted_indices)
+            #inputs = (batch_size, pretrained_emb_dim)
+            inputs = inputs.unsqueeze(1)
+            #inputs = (batch_size, 1, pretrained_emb_dim)
+            predicted_caption_prob.append(predicted_values)
+        predicted_caption_ids = torch.stack(predicted_caption_ids, 1)
+        predicted_caption_prob = torch.stack(predicted_caption_prob, 1)
+        #predicted_captions = (batch_size, max_seq_length)
+      
+        return predicted_caption_ids, predicted_caption_prob
+  
+    def teacher_forcing(self, features, captions, lengths, pretrained_embeddings):
+        """
+        Decodes the encoded image features to captions with teacher forcing.
 
         Args:
             features (tensor): Encoded image features.
@@ -48,18 +91,35 @@ class Decoder(nn.Module):
             output (tensor): Predicted captions of shape(batch_size, captions_length, vocab_length)
         """
         #initializing the captions with pretrained embeddings.
+        #captions.shape: 1d torch tensor
         embeddings = pretrained_embeddings(captions)
+        #embeddings.shape: (batch_size, max_caption_len_in_batch, pretrained_emb_dim)
+
+        #teacher forcing
         #concatenating the image features with captions' embeddigns.
+        #features.shape: (batch_size, decoder_output_dim) 
         embeddings = torch.cat((features.unsqueeze(1), embeddings), 1)
+        #embeddings.shape: (batch_size, max_caption_len_in_batch + 1, pretrained_emb_dim)
+
         #pack padded sequence
-        packed_embeddings = pack_padded_sequence(embeddings, lengths, batch_first = True)
+        #packed_embeddings = pack_padded_sequence(embeddings, lengths, batch_first = True)
+
         #pass the packed embeddings through LSTM.
-        packed_output, _ = self.lstm(packed_embeddings)
+        lstm_output, _ = self.lstm(embeddings)
+        #lstm_output.shape: (batch_size, max_caption_len_in_batch + 1, no_of_lstm_units)
+
         #pad the packed embeddings(output of lstm)
-        padded_output, _ = pad_packed_sequence(packed_output, batch_first=True)
-        #lstm_output_reshaped = lstm_output[:,1:,:]
-        outputs = self.fc_out(padded_output)
-        #outputs = self.fc_out(lstm_output)
+        #padded_output, _ = pad_packed_sequence(packed_output, batch_first=True)
+
+        #removing the first output
+        lstm_output_reshaped = lstm_output[:,1:,:]
+        #outputs.shape: (batch_size, max_caption_len_in_batch, no_of_lstm_units)
+
+        #linear transformation
+        outputs = self.fc_out(lstm_output_reshaped)
+        #outptus: (batch_size, max_caption_len_in_batch, vocab_size)
+
+        #softmax
         # batch_size, captions_length, vocab_length = outputs.size()
         # for i in range(batch_size):
         #     for j in range(captions_length):
@@ -67,4 +127,3 @@ class Decoder(nn.Module):
 
         
         return outputs
-            
