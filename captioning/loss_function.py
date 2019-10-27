@@ -18,3 +18,35 @@ def cross_entropy(predicted_captions, target_captions):
     error = loss(predicted_captions, target_captions)
 
     return error
+
+def l1_loss(predicted_captions, target_captions):
+    """
+    Calculate mean absolute error between each element in predicted and target captons.
+
+    Args:
+        predicted_captions (tensor):
+        target_captions (tensor):
+    
+    Returns:
+        l1_loss (float):
+    """
+    loss_function = nn.L1Loss()
+    loss = loss_function(predicted_captions, target_captions)
+
+    return loss
+
+def mse_loss(predicted_captions, target_captions):
+    """
+    Measure the mean squared error between each element of predicted_captions and target_captions.
+
+    Args:
+        predicted_captions (tensor):
+        target_captions (tensor):
+    
+    Returns:
+        mse_loss (float):
+    """
+    loss_function = nn.MSELoss()
+    loss = loss_function(predicted_captions, target_captions)
+
+    return loss
